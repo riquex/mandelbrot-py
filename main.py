@@ -12,7 +12,7 @@ def ojgrid(top, left, size, density, x, y):
     return r_x + r_y
 
 @njit(uint8(complex128))
-def mandelbrot(c: complex):
+def mandelbrot(c):
     real, imag, n, temp = 0., 0., 0, 0.
     for n in range(256):
         temp = real*real - imag*imag + c.real
@@ -22,17 +22,16 @@ def mandelbrot(c: complex):
     return n
 
 @njit(uint8[:,:](double, double, double, int32), fastmath=True, parallel=True)
-def mSetImg(top, left, size, box)->np.ndarray:
-    grid = np.empty((box, box), dtype=np.uint8)
+def mSetImg(top, left, size, density)->np.ndarray:
+    grid = np.empty((density, density), dtype=np.uint8)
     for y in prange(grid.shape[0]):
         for x in prange(grid.shape[1]):
-            grid[y, x] = mandelbrot(ojgrid(top, left, size, box, x, y))
+            grid[y, x] = mandelbrot(ojgrid(top, left, size, density, x, y))
     return grid
 
 @njit(double[:, :](int32, double, double, double, int32))
-def expChunks(chunks, top, left, size, box):
-    chunks = max(2, chunks)+1
-    i = 0
+def expChunks(chunks, top, left, size, density):
+    chunks, i = max(2, chunks)+1, 0
     res = np.zeros((np.square(chunks-1), 4))
     tops = np.linspace(top, top-size, chunks)[:-1]
     lefts = np.linspace(left, left+size, chunks)[:-1]
@@ -42,7 +41,7 @@ def expChunks(chunks, top, left, size, box):
             res[i, 1] += lefts[x]
             i += 1
     res[:, 2] += tops[0]-tops[1]
-    res[:, 3] += box
+    res[:, 3] += density
     return res
 
 def main(*args, **kwargs)->int:
