@@ -1,4 +1,4 @@
-#!/home/henrique/scripts/scripts_python/Tests/AreaRestrita/numpy/numpy/bin/python3
+#!/usr/bin/python3
 from numba import njit, prange, double, uint8, complex128, int32
 from sys import exit
 import cv2
